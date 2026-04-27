@@ -367,53 +367,61 @@ ReadNetCDF <- function(
       sub <- subset[[s]]
 
       if (inherits(sub, 'AsIs')) {
-        if (is.na(sub[1])) {
-          sub[1] <- 1
-        }
+        if (length(sub) == 1) {
+          start[[s]] <- sub
+          count[[s]] <- 1
+        } else {
+          if (is.na(sub[1])) {
+            sub[1] <- 1
+          }
 
-        if (is.na(sub[2])) {
-          sub[2] <- length(d)
-        }
+          if (is.na(sub[2])) {
+            sub[2] <- length(d)
+          }
 
-        if (sub[1] <= 0) {
-          sub[1] <- length(d) + sub[1]
-        }
+          if (sub[1] <= 0) {
+            sub[1] <- length(d) + sub[1]
+          }
 
-        if (sub[2] <= 0) {
-          sub[2] <- length(d) + sub[2]
-        }
+          if (sub[2] <= 0) {
+            sub[2] <- length(d) + sub[2]
+          }
 
-        start[[s]] <- sub[1]
-        count[[s]] <- abs(sub[2] - sub[1]) + 1
+          start[[s]] <- sub[1]
+          count[[s]] <- abs(sub[2] - sub[1]) + 1
+        }
       } else {
         if (.is.somedate(d)) {
           sub <- lubridate::as_datetime(sub)
         }
 
-        if (is.na(sub[1])) {
-          sub[1] <- min(d)
+        if (length(sub) == 1) {
+          start[[s]] <- which.min(abs(sub - d))
+          count[[s]] <- 1
+        } else {
+          if (is.na(sub[1])) {
+            sub[1] <- min(d)
+          }
+
+          if (is.na(sub[2])) {
+            sub[2] <- max(d)
+          }
+
+          d_temp <- d
+          d_temp[d_temp < sub[1]] <- NA
+          start1 <- which.min(abs(d_temp - sub[1]))
+
+          d_temp <- d
+          d_temp[d_temp > sub[2]] <- NA
+          end <- which.min(abs(d_temp - sub[2]))
+
+          if (length(start1) == 0 || length(end) == 0) {
+            return(NULL)
+          }
+
+          start[[s]] <- min(start1, end)
+          count[[s]] <- abs(end - start1) + 1
         }
-
-        if (is.na(sub[2])) {
-          sub[2] <- max(d)
-        }
-
-        sub <- range(sub)
-
-        d_temp <- d
-        d_temp[d_temp < sub[1]] <- NA
-        start1 <- which.min(abs(d_temp - sub[1]))
-
-        d_temp <- d
-        d_temp[d_temp > sub[2]] <- NA
-        end <- which.min(abs(d_temp - sub[2]))
-
-        if (length(start1) == 0 || length(end) == 0) {
-          return(NULL)
-        }
-
-        start[[s]] <- min(start1, end)
-        count[[s]] <- abs(end - start1) + 1
       }
 
       if (count[[s]] == 0) {
@@ -600,7 +608,7 @@ try_parse_time <- function(time, units, calendar) {
     if (is.list(x)) {
       lapply(x, to_range)
     } else {
-      if (length(x) != 2) {
+      if (length(x) > 2) {
         # Range strips the AsIs class.
         class <- class(x)
         x <- range(x)

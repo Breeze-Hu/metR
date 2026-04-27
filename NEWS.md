@@ -14,6 +14,7 @@
 
 -   Fixes return value of `FitWave()` to always return integer `k`. 
 
+-   Fixes regression in `ReadNetCDF()` when selecting one point. (#219, thanks @delie0512)
 
 
 # metR 0.18.3

@@ -134,3 +134,11 @@ test_that("parse era5 timestamp correctly", {
   r <- ReadNetCDF(file)
   expect_equal(unique(r$valid_time), r$valid_time)
 })
+
+# Fixes #219
+# https://github.com/eliocamp/metR/issues/219
+test_that("reads one point", {
+  file <- system.file("extdata", "temperature.nc", package = "metR")
+  out <- ReadNetCDF(file, subset = list(lat = 45.51, lon = 180.5))
+  expect_equal(nrow(unique(out[, .(lat, lon)])), 1)
+})
