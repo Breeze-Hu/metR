@@ -1,4 +1,3 @@
-
 # context("tex_contour")
 # v <- reshape2::melt(volcano)
 # g <- ggplot(v, aes(Var1, Var2, z = value)) +
