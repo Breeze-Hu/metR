@@ -197,21 +197,19 @@ ReadNetCDF <- function(
     # looping though lots of files.
     options(readnetcdf_check_pkg = FALSE)
     on.exit(options(readnetcdf_check_pkg = TRUE))
-    rlang::check_installed("furrr", "to read multiple files.")
-    data <- furrr::future_map(
+    if (rlang::is_installed("furr")) {
+        iterator <- \(...) furrr::future_map(..., .progress = TRUE)
+    } else {
+        iterator <- lapply
+    }
+    data <- iterator(
       file,
       function(x) {
         ReadNetCDF(x, vars = vars, out = out, subset = subset, key = key)
-      },
-      .progress = TRUE
+      }
     )
     if (out == "data.frame") {
-      data <- data.table::rbindlist(data)
-    } else if (out == "vector") {
-      data <- as.list(data.table::rbindlist(list(
-        list(x = 1:10, y = 1:10),
-        list(x = 1:10, y = 1:10)
-      )))
+      data <- data.table::rbindlist(data, idcol = "file")
     }
 
     return(data)

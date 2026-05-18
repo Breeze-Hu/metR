@@ -2,9 +2,13 @@
 
 ## New features
 
--  `geom_streamline()` gets a `start` argument to manually specify starting locations for the integration. 
+-   `geom_streamline()` gets a `start` argument to manually specify starting locations for the integration. 
 
 -   `geom_streamline()` handles groups defined in different grids better. 
+
+-   When reading multiple files, `ReadNetCDF()` will add a "file" column that uses the names of the vector of files (if it has).
+
+-   Reading multiple files with `ReadNetCDF()` does not require `furrr` but will use it if it's installed.
 
 ## Bug fixes
 
